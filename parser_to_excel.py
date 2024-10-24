@@ -1,5 +1,15 @@
 import re
 import pandas as pd
+import latex2mathml.converter
+
+
+def convert_symb(match):
+    math_symbol = match.group(1)
+    try:
+        math_expr = latex2mathml.converter.convert(math_symbol)
+        return math_expr
+    except Exception:
+        return math_symbol
 
 
 def parse_md_to_excel(md_file, excel_file):
@@ -8,6 +18,7 @@ def parse_md_to_excel(md_file, excel_file):
         part_pattern = r'#+ ЧАСТЬ (\d+)'
         q_pattern = r'([BCВ]\d+)\s+(.+?)(?=\n\s*[BCВ]\d+|\Z)'
         imag_pattern = r'!\[.*\]\((.*?)\)'
+        math_pattern = r'\$(.+?)\$'
     data = []
     parts = re.split(part_pattern, content)
     for i in range(1, len(parts), 2):
@@ -20,8 +31,10 @@ def parse_md_to_excel(md_file, excel_file):
             q_text = question[1].strip()
             images = re.findall(imag_pattern, q_text)
             clean_text = re.sub(imag_pattern, '', q_text).strip()
+            math_text = re.sub(math_pattern, convert_symb, clean_text)
+
             data.append(
-                [part_number, q_number, clean_text,
+                [part_number, q_number, math_text,
                     ', '.join(images) if images else '']
                 )
 

@@ -6,11 +6,16 @@ from sympy.parsing.latex import parse_latex
 def convert_symb(match):
     math_symbol = match.group(1)
     try:
-        math_expr = parse_latex(math_symbol)
+        expr = math_symbol.replace('~', '')
+        expr = re.sub(r'\\mathrm{([^}]*)}', r'\1', expr)
+        expr = expr.replace(r'\cdot', '*')
+        math_expr = parse_latex(expr)
         return str(math_expr)
-    except Exception:
+    except Exception as e:
+        print()
+        print(f"Ошибка при обработке: {math_symbol} -> {e}")
         return math_symbol
-
+        
 
 def parse_md_to_excel(md_file, excel_file):
     with open(md_file, 'r', encoding='utf-8') as md:

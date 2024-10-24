@@ -1,13 +1,13 @@
 import re
 import pandas as pd
-import latex2mathml.converter
+from sympy.parsing.latex import parse_latex
 
 
 def convert_symb(match):
     math_symbol = match.group(1)
     try:
-        math_expr = latex2mathml.converter.convert(math_symbol)
-        return math_expr
+        math_expr = parse_latex(math_symbol)
+        return str(math_expr)
     except Exception:
         return math_symbol
 
